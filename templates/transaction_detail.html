@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block title %}Expense Details - Budget Buddy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-receipt"></i> Expense Details</h1>
+        <div>
+            <a href="{% url 'transaction_edit' transaction.pk %}" class="btn btn-secondary">
+                <i class="fas fa-edit"></i> Edit
+            </a>
+            <a href="{% url 'transaction_delete' transaction.pk %}" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Delete
+            </a>
+        </div>
+    </div>
+
+    <div class="detail-card">
+        <div class="detail-header">
+            <span class="category-badge category-{{ transaction.category|lower }} large">
+                {{ transaction.category }}
+            </span>
+            <h2 class="detail-amount">${{ transaction.amount }}</h2>
+        </div>
+
+        <div class="detail-body">
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-calendar"></i> Date
+                </div>
+                <div class="detail-value">
+                    {{ transaction.date|date:"F d, Y" }}
+                </div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-clock"></i> Added On
+                </div>
+                <div class="detail-value">
+                    {{ transaction.created_at|date:"F d, Y g:i A" }}
+                </div>
+            </div>
+
+            {% if transaction.note %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-sticky-note"></i> Note
+                </div>
+                <div class="detail-value">
+                    {{ transaction.note }}
+                </div>
+            </div>
+            {% else %}
+            <div class="detail-row">
+                <div class="detail-label">
+                    <i class="fas fa-sticky-note"></i> Note
+                </div>
+                <div class="detail-value text-muted">
+                    No note provided
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div class="detail-footer">
+            <a href="{% url 'transaction_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

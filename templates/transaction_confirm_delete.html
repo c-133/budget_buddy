@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Expense - Budget Buddy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1><i class="fas fa-exclamation-triangle"></i> Delete Expense</h1>
+    </div>
+
+    <div class="form-card delete-card">
+        <div class="delete-warning">
+            <i class="fas fa-exclamation-circle"></i>
+            <h2>Are you sure?</h2>
+            <p>You are about to delete this expense. This action cannot be undone.</p>
+        </div>
+
+        <div class="delete-details">
+            <div class="detail-row">
+                <strong>Category:</strong>
+                <span class="category-badge category-{{ transaction.category|lower }}">
+                    {{ transaction.category }}
+                </span>
+            </div>
+            <div class="detail-row">
+                <strong>Amount:</strong>
+                <span class="amount">${{ transaction.amount }}</span>
+            </div>
+            <div class="detail-row">
+                <strong>Date:</strong>
+                {{ transaction.date|date:"F d, Y" }}
+            </div>
+            {% if transaction.note %}
+            <div class="detail-row">
+                <strong>Note:</strong>
+                {{ transaction.note|truncatewords:20 }}
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> Yes, Delete
+                </button>
+                <a href="{% url 'transaction_detail' transaction.pk %}" class="btn btn-outline">
+                    <i class="fas fa-times"></i> Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

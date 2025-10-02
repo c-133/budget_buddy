@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% block title %}Home - Budget Buddy{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="hero">
+        <h1><i class="fas fa-chart-line"></i> Welcome to Budget Buddy</h1>
+        <p class="hero-subtitle">Your personal expense tracking companion</p>
+    </div>
+
+    <div class="dashboard-cards">
+        <div class="card card-primary">
+            <div class="card-icon">
+                <i class="fas fa-plus-circle"></i>
+            </div>
+            <h3>Add New Expense</h3>
+            <p>Record your latest expense quickly and easily</p>
+            <a href="{% url 'transaction_add' %}" class="btn btn-primary">Add Expense</a>
+        </div>
+
+        <div class="card card-secondary">
+            <div class="card-icon">
+                <i class="fas fa-list"></i>
+            </div>
+            <h3>View All Expenses</h3>
+            <p>Browse and search through your transaction history</p>
+            <a href="{% url 'transaction_list' %}" class="btn btn-secondary">View Expenses</a>
+        </div>
+
+        <div class="card card-accent">
+            <div class="card-icon">
+                <i class="fas fa-search"></i>
+            </div>
+            <h3>Search & Filter</h3>
+            <p>Find specific expenses by date, category, or keyword</p>
+            <a href="{% url 'transaction_list' %}" class="btn btn-accent">Search</a>
+        </div>
+    </div>
+
+    {% if recent_transactions %}
+    <div class="recent-section">
+        <h2><i class="fas fa-clock"></i> Recent Expenses</h2>
+        <div class="table-responsive">
+            <table class="transaction-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Amount</th>
+                        <th>Note</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in recent_transactions %}
+                    <tr>
+                        <td data-label="Date">{{ transaction.date|date:"M d, Y" }}</td>
+                        <td data-label="Category">
+                            <span class="category-badge category-{{ transaction.category|lower }}">
+                                {{ transaction.category }}
+                            </span>
+                        </td>
+                        <td data-label="Amount" class="amount">${{ transaction.amount }}</td>
+                        <td data-label="Note">{{ transaction.note|truncatewords:10|default:"—" }}</td>
+                        <td data-label="Actions">
+                            <a href="{% url 'transaction_detail' transaction.pk %}" class="btn-link">View</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <div class="text-center" style="margin-top: 1.5rem;">
+            <a href="{% url 'transaction_list' %}" class="btn btn-outline">View All Expenses</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
