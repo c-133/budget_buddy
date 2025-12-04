@@ -38,6 +38,164 @@
         </div>
     </div>
 
+    <!-- Calendar Section -->
+    <div class="calendar-section">
+        <div class="calendar-wrapper">
+            <!-- Left Side - Calendar -->
+            <div class="calendar-left">
+                <div class="calendar-header">
+                    <a href="?year={{ prev_month.year }}&month={{ prev_month.month }}" class="calendar-nav-btn">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                    <h2>
+                        <i class="fas fa-calendar-alt"></i> {{ current_month }}
+                    </h2>
+                    <a href="?year={{ next_month.year }}&month={{ next_month.month }}" class="calendar-nav-btn">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+
+                <div class="calendar-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-wallet"></i>
+                        <div>
+                            <div class="stat-label">Monthly Total</div>
+                            <div class="stat-value">${{ monthly_total|floatformat:2 }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="calendar-container">
+                    <div class="calendar-weekdays">
+                        <div class="weekday">Sun</div>
+                        <div class="weekday">Mon</div>
+                        <div class="weekday">Tue</div>
+                        <div class="weekday">Wed</div>
+                        <div class="weekday">Thu</div>
+                        <div class="weekday">Fri</div>
+                        <div class="weekday">Sat</div>
+                    </div>
+
+                    <div class="calendar-grid">
+                        {% for week in calendar_data %}
+                            {% for day_data in week %}
+                                {% if day_data.day == 0 %}
+                                    <div class="calendar-day calendar-day-empty"></div>
+                                {% else %}
+                                    <div class="calendar-day {% if day_data.is_today %}calendar-day-today{% endif %} {% if day_data.transactions %}calendar-day-has-expenses{% endif %}" 
+                                         data-day="{{ day_data.day }}" 
+                                         data-date="{{ current_year }}-{{ current_month_num }}-{{ day_data.day }}" 
+                                         onclick="showDayDetails(this, {{ day_data.day }}, '{{ current_month }}', {{ day_data.total|floatformat:2 }}, {{ day_data.transactions|length }})">
+                                        <div class="day-number">{{ day_data.day }}</div>
+                                        {% if day_data.transactions %}
+                                            <div class="expense-indicator">
+                                                <i class="fas fa-circle"></i>
+                                            </div>
+                                            <div class="day-amount">${{ day_data.total|floatformat:0 }}</div>
+                                        {% endif %}
+                                        <div class="day-data" style="display:none;">
+                                            {% for transaction in day_data.transactions %}
+                                                <div class="transaction-item" 
+                                                     data-category="{{ transaction.category }}" 
+                                                     data-amount="{{ transaction.amount }}" 
+                                                     data-note="{{ transaction.note|default:'' }}">
+                                                </div>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side - Details -->
+            <div class="calendar-right">
+                <div id="expense-details" class="expense-details">
+                    <div class="details-header">
+                        <h3><i class="fas fa-receipt"></i> <span id="selected-date">Select a date</span></h3>
+                    </div>
+                    <div id="details-content" class="details-content">
+                        <div class="no-selection">
+                            <i class="fas fa-hand-pointer"></i>
+                            <p>Click on a date in the calendar to view expenses</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function showDayDetails(element, day, month, total, count) {
+        // Remove active class from all days
+        document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('calendar-day-active'));
+        
+        // Add active class to clicked day
+        element.classList.add('calendar-day-active');
+        
+        // Update selected date
+        document.getElementById('selected-date').textContent = month + ' ' + day;
+        
+        // Get transaction data
+        const dayData = element.querySelector('.day-data');
+        const transactions = dayData ? dayData.querySelectorAll('.transaction-item') : [];
+        
+        let detailsHTML = '';
+        
+        if (transactions.length === 0) {
+            detailsHTML = `
+                <div class="no-expenses">
+                    <i class="fas fa-check-circle"></i>
+                    <p>No expenses recorded for this day</p>
+                </div>
+            `;
+        } else {
+            detailsHTML = `
+                <div class="details-summary">
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-dollar-sign"></i></div>
+                        <div>
+                            <div class="summary-label">Total Spent</div>
+                            <div class="summary-value">$${parseFloat(total).toFixed(2)}</div>
+                        </div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-icon"><i class="fas fa-list"></i></div>
+                        <div>
+                            <div class="summary-label">Transactions</div>
+                            <div class="summary-value">${count}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="transactions-list">
+                    <h4><i class="fas fa-receipt"></i> Expense Details</h4>
+            `;
+            
+            transactions.forEach(transaction => {
+                const category = transaction.dataset.category;
+                const amount = transaction.dataset.amount;
+                const note = transaction.dataset.note;
+                
+                detailsHTML += `
+                    <div class="transaction-detail-item">
+                        <div class="transaction-detail-header">
+                            <span class="category-badge category-${category.toLowerCase()}">${category}</span>
+                            <span class="transaction-detail-amount">$${parseFloat(amount).toFixed(2)}</span>
+                        </div>
+                        ${note ? `<div class="transaction-detail-note"><i class="fas fa-sticky-note"></i> ${note}</div>` : ''}
+                    </div>
+                `;
+            });
+            
+            detailsHTML += '</div>';
+        }
+        
+        document.getElementById('details-content').innerHTML = detailsHTML;
+    }
+    </script>
+
     {% if recent_transactions %}
     <div class="recent-section">
         <h2><i class="fas fa-clock"></i> Recent Expenses</h2>
